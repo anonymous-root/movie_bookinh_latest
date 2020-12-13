@@ -1,0 +1,894 @@
+import React, { Component } from "react";
+import { Link, Redirect } from "react-router-dom";
+import Header from "../layout/header2";
+import Footer from "../layout/footer";
+import { Accordion, AccordionItem } from "react-sanfona";
+import axios from "axios";
+import Summary from "./summary-dentist";
+import history from "../../history";
+
+//import './App.css';
+
+const bg = require("../../images/tsdc/tsdc.jpg");
+
+class ShopCheckout extends Component {
+  state = {
+    showOption: false,
+    showBDFields: false,
+    showMDFields: false,
+    showOtherFields: false,
+    category: [],
+    regtype: [],
+    fmessage: "",
+    rmessage: "",
+    // value: 'Bachelor of Dental (BD)',
+    //files
+    ad: "",
+    cb: "",
+    cc: "",
+    ic: "",
+    noc: "",
+    photo: "",
+    pd: "",
+    smm: "",
+    //body parameter
+    categoryval: "",
+    fullName: "",
+    gender: "",
+    fatherName: "",
+    birthPlace: "",
+    dob: "",
+    nationality: "",
+    resAddress: "",
+    proAddress: "",
+    descQualification: "",
+    quaCategory: "",
+    nameAddressBD: "",
+    monthYearBD: "",
+    institutionBD: "",
+    nameAddressMD: "",
+    monthYearMD: "",
+    institutionMD: "",
+    nameAddressOther: "",
+    monthYearOther: "",
+    institutionOther: "",
+    email: "",
+    mobile: "",
+    aadharNo: "",
+    regtypeval: "",
+    catFees: 0,
+    typeFees: 0,
+    fees: 0,
+  };
+
+  //set the statte default value
+  //   constructor(props) {
+  //     super(props);
+  //     this.state = {value: 'Bachelor of Dental (BD)', showBDFields:false,showMDFields:false,showOtherFields:false,categorydata:[],categoryval:''};
+  //   }
+
+  //   const [showFields, setShowFields] = useState(false);
+  qualificationstatus = (e) => {
+    this.setState({ ...this.state, value: e.target.value });
+    if (e.target.value === "Bachelor of Dental (BD)") {
+      this.setState({
+        ...this.state,
+        showBDFields: true,
+        showMDFields: false,
+        showOtherFields: false,
+      });
+    } else if (
+      e.target.value === "Bachelor of Dental (BD) plus Master of Dental (MD)"
+    ) {
+      this.setState({
+        ...this.state,
+        showBDFields: true,
+        showMDFields: true,
+        showOtherFields: false,
+      });
+    } else if (
+      e.target.value ===
+      "Bachelor of Dental (BD) plus Master of Dental (MD) plus Others"
+    ) {
+      this.setState({
+        ...this.state,
+        showBDFields: true,
+        showMDFields: true,
+        showOtherFields: true,
+      });
+    }
+  };
+  //set the state value based on select option value
+  divstatus = (e) => {
+    this.setState({ ...this.state, value: e.target.value });
+    if (e.target.value === "1") {
+      this.setState({
+        ...this.state,
+        showPermanentFields: true,
+        showTemporaryFields: false,
+      });
+    } else if (e.target.value === "2") {
+      this.setState({
+        ...this.state,
+        showPermanentFields: false,
+        showTemporaryFields: true,
+      });
+    }
+  };
+  componentDidMount = () => {
+    axios
+      .get(`${process.env.REACT_APP_BASENAME}category?formType=${0}`)
+      .then((response) => {
+        // console.log(response.data)
+        this.setState({
+          category: response.data.result,
+        });
+        // console.log("STATE DATA",this.state.category)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    axios
+      .get(`${process.env.REACT_APP_BASENAME}regtype?formType=${0}`)
+      .then((response) => {
+        // console.log(response.data)
+        this.setState({
+          regtype: response.data.result,
+        });
+        // console.log("STATE DATA",this.state.regtype)
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  handleOptionChange = (event) => {
+    event.preventDefault();
+    this.setState({
+      showOption: true,
+    });
+    console.log("changed");
+  };
+  handleCategoryAmount = (e) => {
+    e.preventDefault();
+    // console.log("Category id", e.target.value)
+    const catid = e.target.value;
+    axios
+      .get(`${process.env.REACT_APP_BASENAME}category/${catid}`)
+      .then((response) => {
+        // console.log(response.data)
+        this.setState({
+          categoryval: response.data.result[0].category,
+          catFees: response.data.result[0].amount,
+        });
+        // console.log("Category fees",Number(this.state.catFees))
+      })
+      .then(() => {
+        // console.log("next then")
+        var fees = Number(this.state.catFees) + Number(this.state.typeFees);
+        // console.log("total fees",fees)
+        this.setState({
+          fees: fees,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  handleTypeAmount = (e) => {
+    e.preventDefault();
+    //   console.log("Type id", e.target.value)
+    const typeid = e.target.value;
+    axios
+      .get(`${process.env.REACT_APP_BASENAME}regtype/${typeid}`)
+      .then((response) => {
+        //   console.log(response.data)
+        this.setState({
+          regtypeval: response.data.result[0].typeName,
+          typeFees: response.data.result[0].amount,
+        });
+        //   console.log("Type fees",Number(this.state.typeFees))
+      })
+      .then(() => {
+        // console.log("next then")
+        var fees = Number(this.state.catFees) + Number(this.state.typeFees);
+        // console.log("total fees",fees)
+        this.setState({
+          fees: fees,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  handleCatValue = (e) => {
+    e.preventDefault();
+    // console.log("qualification category", e.target.value)
+    this.setState({
+      quaCategory: e.target.value,
+    });
+  };
+
+  checkEmail = (emailval) => {
+    console.log(`Email ${emailval}`);
+    if (emailval == "") {
+     
+      this.setState({
+        fmessage: " Email must required",
+        rmessage: "",
+      });
+       document.getElementById("txtemail").focus();
+    } else {
+      axios
+        .get(`${process.env.REACT_APP_BASENAME}dentist/${emailval}`)
+        .then((response) => {
+          console.log(response.data);
+          if (response.data.flag != 1) {
+            console.log("In condiition");
+            // email.focus();
+            document.getElementById("txtemail").focus();
+            this.setState({
+              fmessage: response.data.message,
+              rmessage: "",
+              email: "",
+            });
+          } else {
+            this.setState({
+              rmessage: response.data.message,
+              fmessage: "",
+            });
+          }
+        })
+        .catch((error) => {});
+    }
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    
+    //files
+    var data = new FormData();
+    data.append("ad", this.state.ad);
+    data.append("cb", this.state.cb);
+    data.append("cc", this.state.cc);
+    data.append("ic", this.state.ic);
+    data.append("noc", this.state.noc);
+    data.append("photo", this.state.photo);
+    data.append("pd", this.state.pd);
+    data.append("smm", this.state.smm);
+    data.append("category", this.state.categoryval);
+    data.append("fullName", this.state.fullName);
+    data.append("gender", this.state.gender);
+    data.append("fatherName", this.state.fatherName);
+    data.append("birthPlace", this.state.birthPlace);
+    data.append("dob", this.state.dob);
+    data.append("nationality", this.state.nationality);
+    data.append("resAddress", this.state.resAddress);
+    data.append("proAddress", this.state.proAddress);
+    data.append("descQualification", this.state.descQualification);
+    data.append("quaCategory", this.state.quaCategory);
+    data.append("nameAddressBD", this.state.nameAddressBD);
+    data.append("monthYearBD", this.state.monthYearBD);
+    data.append("institutionBD", this.state.institutionBD);
+    data.append("nameAddressMD", this.state.nameAddressMD);
+    data.append("monthYearMD", this.state.monthYearMD);
+    data.append("institutionMD", this.state.institutionMD);
+    data.append("nameAddressOther", this.state.nameAddressOther);
+    data.append("monthYearOther", this.state.monthYearOther);
+    data.append("institutionOther", this.state.institutionOther);
+    data.append("email", this.state.email);
+    data.append("mobile", this.state.mobile);
+    data.append("aadharNo", this.state.aadharNo);
+    data.append("regType", this.state.regtypeval);
+    data.append("catFees", this.state.catFees);
+    data.append("typeFees", this.state.typeFees);
+    data.append("fees", this.state.fees);
+
+    // console.log(data)
+    const formHeaders = { "content-type": "multipart/form-data" };
+    axios
+      .post(`${process.env.REACT_APP_BASENAME}dentist`, data, {
+        headers: formHeaders,
+      })
+      .then((response) => {
+        console.log(response.data.result);
+        if (response.data.status == true) {
+          var id = response.data.result.id;
+          console.log("Id", id);
+          // history.push(`/react/summary-dentist/${id}`)
+          window.location.href = `/react/summary-dentist/${id}`;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  render() {
+    return (
+      <>
+        <Header />
+
+        <div class="page-content bg-white">
+          <div
+            class="dlab-bnr-inr overlay-black-middle bg-pt"
+            style={{ backgroundImage: "url(" + bg + ")" }}
+          >
+            <div class="container">
+              <div class="dlab-bnr-inr-entry">
+                <h1 class="text-white">Dentist Registration</h1>
+                <div class="breadcrumb-row">
+                  <ul class="list-inline">
+                    <li>
+                      <Link to="#">Home</Link>
+                    </li>
+                    <li>Dentist Registration</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-full content-inner">
+            <div class="container">
+              <form class="shop-form" onSubmit={this.handleSubmit}>
+                <div class="row">
+                  <div class="col-lg-12 col-md-6 col-md-6 m-b30">
+                    {/*  onKeyUp="this.value.toUpperCase()"  <div class="p-a30 border-1  max-w800 m-auto"></div> <h4>Billing & Shipping Address</h4>  */}
+                    <div class="row">
+                      <div class="form-group col-md-6">
+                        <label>Category</label>
+
+                        <select
+                          class="form-control"
+                          onChange={this.handleCategoryAmount}
+                          required
+                        >
+                          <option value="" disabled selected>
+                            --Select--
+                          </option>
+                          {this.state.category.length > 0 ? (
+                            this.state.category.map((item) => (
+                              <option value={item.id}>{item.category}</option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              --Select--
+                            </option>
+                          )}
+                        </select>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Full Name (as per Degree)</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Full Name"
+                          required
+                          value={this.state.fullName}
+                          onChange={(e) =>
+                            this.setState({ fullName: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Gender</label>
+                        <select
+                          class="form-control"
+                          required
+                          value={this.state.gender}
+                          onChange={(e) =>
+                            this.setState({ gender: e.target.value })
+                          }
+                        >
+                          <option value="" disabled selected>
+                            --Select--
+                          </option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Father’s Name</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Father’s Name"
+                          required
+                          value={this.state.fatherName}
+                          onChange={(e) =>
+                            this.setState({ fatherName: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Place, date & year of birth</label>
+                        <div class="col-md-12">
+                          <div class="row">
+                            <input
+                              type="text"
+                              class="form-control col-md-6"
+                              placeholder="Place"
+                              value={this.state.birthPlace}
+                              onChange={(e) =>
+                                this.setState({ birthPlace: e.target.value })
+                              }
+                              required
+                            />
+                            <input
+                              type="date"
+                              class="form-control col-md-6"
+                              placeholder="Address"
+                              value={this.state.dob}
+                              onChange={(e) =>
+                                this.setState({ dob: e.target.value })
+                              }
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group col-md-6">
+                        <Accordion>
+                          <AccordionItem
+                            title={
+                              <label>
+                                Nationality (Kindly give information in detail){" "}
+                                <i class="fa fa-info-circle"></i>
+                              </label>
+                            }
+                          >
+                            <div id="create-an-account">
+                              <p>
+                                [Whether natural born Indian Citizen; Whether
+                                natural born British Subject; Whether British
+                                Subject of Indian Domicile; Whether naturalized
+                                Indian Citizen; Whether Subject of a Foreign
+                                Government]
+                              </p>
+                            </div>
+                          </AccordionItem>
+                        </Accordion>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Nationality"
+                          value={this.state.nationality}
+                          onChange={(e) =>
+                            this.setState({ nationality: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Residential address with pin code</label>
+                      <textarea
+                        class="form-control"
+                        required
+                        placeholder="Residential address with pin code"
+                        value={this.state.resAddress}
+                        onChange={(e) =>
+                          this.setState({ resAddress: e.target.value })
+                        }
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label>Professional address (for Clinicians)</label>
+                      <textarea
+                        class="form-control"
+                        placeholder="Professional address (for Clinicians)"
+                        value={this.state.proAddress}
+                        onChange={(e) =>
+                          this.setState({ proAddress: e.target.value })
+                        }
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label>
+                        Description of Qualification/s for which registration is
+                        desired
+                      </label>
+                      <textarea
+                        class="form-control"
+                        required
+                        placeholder="Description of Qualification/s for which registration is desired"
+                        value={this.state.descQualification}
+                        onChange={(e) =>
+                          this.setState({ descQualification: e.target.value })
+                        }
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label>Qualification Category</label>
+                      <select
+                        class="form-control"
+                        onChange={this.qualificationstatus}
+                        onBlur={this.handleCatValue}
+                        required
+                      >
+                        <option value="" disabled selected>
+                          --Select--
+                        </option>
+                        <option value="Bachelor of Dental (BD)">
+                          Bachelor of Dental (BD)
+                        </option>
+                        <option value="Bachelor of Dental (BD) plus Master of Dental (MD)">
+                          Bachelor of Dental (BD) + Master of Dental (MD)
+                        </option>
+                        <option value="Bachelor of Dental (BD) plus Master of Dental (MD) plus Others">
+                          Bachelor of Dental (BD) + Master of Dental (MD) +
+                          Others
+                        </option>
+                      </select>
+                    </div>
+                    {this.state.showBDFields && (
+                      <>
+                        {/* <p> Start Select Bachelor of Dental (BD)</p> */}
+                        <div class="form-group">
+                          <label>Name & address of the Authority (BD)</label>
+                          <textarea
+                            class="form-control"
+                            placeholder="Name & address of the Authority (BD)"
+                            value={this.state.nameAddressBD}
+                            onChange={(e) =>
+                              this.setState({ nameAddressBD: e.target.value })
+                            }
+                            required
+                          ></textarea>
+                        </div>
+                        <div class="row">
+                          <div class="form-group col-md-6">
+                            <label>
+                              Month & year of attaining the Qualification (BD)
+                            </label>
+                            <input
+                              type="date"
+                              data-date-format="mm-yyyy"
+                              class="form-control"
+                              required
+                              placeholder="Month & year of attaining the Qualification (BD)"
+                              value={this.state.monthYearBD}
+                              onChange={(e) =>
+                                this.setState({ monthYearBD: e.target.value })
+                              }
+                            />
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label>
+                              Institution from which applicant graduated (BD)
+                            </label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              required
+                              placeholder="Institution from which applicant graduated (BD)"
+                              value={this.state.institutionBD}
+                              onChange={(e) =>
+                                this.setState({ institutionBD: e.target.value })
+                              }
+                            />
+                          </div>
+                        </div>
+                        {/* <p> End Select Bachelor of Dental (BD)</p> */}
+                      </>
+                    )}
+                    {this.state.showMDFields && (
+                      <>
+                        {/* <p>Select Master of Dental (MD)</p> */}
+                        <div class="form-group">
+                          <label>Name & address of the Authority (MD)</label>
+                          <textarea
+                            class="form-control"
+                            placeholder="Name & address of the Authority (MD)"
+                            required
+                            value={this.state.nameAddressMD}
+                            onChange={(e) =>
+                              this.setState({ nameAddressMD: e.target.value })
+                            }
+                          ></textarea>
+                        </div>
+                        <div class="row">
+                          <div class="form-group col-md-6">
+                            <label>
+                              Month & year of attaining the Qualification (MD)
+                            </label>
+                            <input
+                              type="date"
+                              data-date-format="mm-yyyy"
+                              class="form-control"
+                              required
+                              placeholder="Month & year of attaining the Qualification (MD)"
+                              value={this.state.monthYearMD}
+                              onChange={(e) =>
+                                this.setState({ monthYearMD: e.target.value })
+                              }
+                            />
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label>
+                              Institution from which applicant graduated (MD)
+                            </label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Institution from which applicant graduated (MD)"
+                              value={this.state.institutionMD}
+                              onChange={(e) =>
+                                this.setState({ institutionMD: e.target.value })
+                              }
+                              required
+                            />
+                          </div>
+                        </div>
+                        {/* <p>End Select Bachelor of Dental (BD) plus Master of Dental (MD)</p> */}
+                      </>
+                    )}
+                    {this.state.showOtherFields && (
+                      <>
+                        {/* <p>Select Bachelor of Dental (BD) plus Master of Dental (MD) plus Others</p> */}
+
+                        <div class="form-group">
+                          <label>Name & address of the Authority (Other)</label>
+                          <textarea
+                            class="form-control"
+                            placeholder="Name & address of the Authority (Other)"
+                            required
+                            value={this.state.nameAddressOther}
+                            onChange={(e) =>
+                              this.setState({
+                                nameAddressOther: e.target.value,
+                              })
+                            }
+                          ></textarea>
+                        </div>
+                        <div class="row">
+                          <div class="form-group col-md-6">
+                            <label>
+                              Month & year of attaining the Qualification
+                              (Other)
+                            </label>
+                            <input
+                              type="date"
+                              data-date-format="mm-yyyy"
+                              class="form-control"
+                              placeholder="Month & year of attaining the Qualification (Other)"
+                              required
+                              value={this.state.monthYearOther}
+                              onChange={(e) =>
+                                this.setState({
+                                  monthYearOther: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div class="form-group col-md-6">
+                            <label>
+                              Institution from which applicant graduated (Other)
+                            </label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Institution from which applicant graduated (Other)"
+                              required
+                              value={this.state.institutionOther}
+                              onChange={(e) =>
+                                this.setState({
+                                  institutionOther: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        {/* <p>End Select Bachelor of Dental (BD) plus Master of Dental (MD) plus Others</p> */}
+                      </>
+                    )}
+                    <div class="row">
+                      <div class="form-group col-md-6">
+                        <label>Email ID</label>
+                        <span className="text-danger">
+                          {this.state.fmessage}
+                        </span>
+                        <span className="text-success">
+                          {this.state.rmessage}
+                        </span>
+                        <input
+                          type="email"
+                          id="txtemail"
+                          class="form-control"
+                          placeholder="Email ID"
+                          required
+                          value={this.state.email}
+                          onBlur={() => this.checkEmail(this.state.email)}
+                          onChange={(e) =>
+                            this.setState({ email: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Mobile No.</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Mobile No."
+                          required
+                          value={this.state.mobile}
+                          onChange={(e) =>
+                            this.setState({ mobile: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Aadhaar Card No.</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Aadhaar Card No."
+                          required
+                          value={this.state.aadharNo}
+                          onChange={(e) =>
+                            this.setState({ aadharNo: e.target.value })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Photo (passport size)</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          onChange={(e) =>
+                            this.setState({ photo: e.target.files[0] })
+                          }
+                          class="form-control"
+                          required
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Provisional Degree</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          onChange={(e) =>
+                            this.setState({ pd: e.target.files[0] })
+                          }
+                          required
+                          class="form-control"
+                          required
+                        />
+                      </div>
+
+                      <div class="form-group col-md-6">
+                        <label>College Bonofide</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          required
+                          class="form-control"
+                          required
+                          onChange={(e) =>
+                            this.setState({ cb: e.target.files[0] })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>SSC Marks Memo</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          required
+                          class="form-control"
+                          required
+                          onChange={(e) =>
+                            this.setState({ smm: e.target.files[0] })
+                          }
+                        />
+                      </div>
+
+                      <div class="form-group col-md-6">
+                        <label>Affidavit</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          required
+                          class="form-control"
+                          required
+                          onChange={(e) =>
+                            this.setState({ ad: e.target.files[0] })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-6">
+                        <label>Internship Certificate</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          class="form-control"
+                          required
+                          onChange={(e) =>
+                            this.setState({ ic: e.target.files[0] })
+                          }
+                        />
+                      </div>
+
+                      <div class="form-group col-md-6">
+                        <label>College Custodian</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          class="form-control"
+                          required
+                          onChange={(e) =>
+                            this.setState({ cc: e.target.files[0] })
+                          }
+                        />
+                      </div>
+
+                      <div class="form-group col-md-6">
+                        <label>NOC - State & DCI</label>
+                        <input
+                          style={{ padding: "5px" }}
+                          type="file"
+                          class="form-control"
+                          required
+                          onChange={(e) =>
+                            this.setState({ noc: e.target.files[0] })
+                          }
+                        />
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label>Registration Type</label>
+
+                        <select
+                          class="form-control"
+                          onChange={this.handleTypeAmount}
+                          required
+                        >
+                          <option value="" disabled selected>
+                            --Select--
+                          </option>
+                          {this.state.regtype.length > 0 ? (
+                            this.state.regtype.map((item) => (
+                              <option value={item.id}>{item.typeName}</option>
+                            ))
+                          ) : (
+                            <option value="" disabled>
+                              --Select--
+                            </option>
+                          )}
+                        </select>
+                      </div>
+                      <div class="form-group col-md-3">
+                        <label>Fee</label>
+                        <input
+                          type="text"
+                          value={this.state.fees}
+                          onChange={(e) =>
+                            this.setState({ fees: e.target.value })
+                          }
+                          class="form-control"
+                          placeholder=""
+                          readOnly
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <input
+                        type="submit"
+                        class="site-button m-r5 radius-no"
+                        style={{ margin: "0 auto" }}
+                        value="Submit"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <Footer hideContactInfo />
+      </>
+    );
+  }
+}
+export default ShopCheckout;

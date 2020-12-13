@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=, initial-scale=1.0">
+    <title>Node file uploads</title>
+</head>
+<body>
+    <div>
+        <h1>File Uploads</h1>
+        <%= typeof msg != 'undefined' ? msg : '' %>
+        <form action="/addmovie" method="POST" enctype="multipart/form-data">
+            <input type="text" name="moviename"><br>
+            <input type="text" name="releasedate"><br>
+            <input type="text" name="movie_status"><br>
+            <input type="text" name="movie_category"><br>
+            <input type="text" name="director_name"><br>
+            <input type="text" name="Actors"><br>
+            <input type="text" name="movie_description"><br>
+            <input type="text" name="movie_type"><br>
+            <input type="text" name="booking_status"><br>
+
+            <input type="file" name="movie_logo">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
